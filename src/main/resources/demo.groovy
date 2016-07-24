@@ -1,8 +1,19 @@
 package com.sea.dsl
 
-class Foo implements IFoo{
-    public Object run(Integer foo) {
+def d1 = new DramaDataSource()
+d1.database = "d1"
+d1.Schema = ""
+d1.table = ""
 
-        return foo + 2
-    }
-}
+def d2 = new DramaDataSource()
+
+t = new DramaTables()
+t.left = "select * from " + d2 + " where time= " + new Trigger("time")
+t.right = "select * from " + d1;
+
+def m = new MatchRules()
+def r = new ReconRules()
+
+def e = new Explainer("explainer1")
+
+print(t.left)
