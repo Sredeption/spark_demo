@@ -22,9 +22,10 @@ object SparkDemo extends App {
   t.show()
   val d = job.diff()
 
+  d.schema.fields
   def explainer = new Explainer(getClass.getClassLoader.getResourceAsStream("exp2.groovy"))
 
   d.show()
-  d.foreach(explainer.explain)
+  d.collect().foreach(explainer.explain)
 }
 

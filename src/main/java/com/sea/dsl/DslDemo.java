@@ -20,7 +20,7 @@ public class DslDemo {
         ClassLoader classLoader = DslDemo.class.getClassLoader();
         CompilerConfiguration config = new CompilerConfiguration();
         config.setScriptBaseClass("com.sea.dsl.MyBaseClass");
-        ImportCustomizer icz=new ImportCustomizer();
+        ImportCustomizer icz = new ImportCustomizer();
         icz.addImports("groovy.time.TimeCategory");
         config.addCompilationCustomizers(icz);
         GroovyShell shell = new GroovyShell(classLoader, new Binding(), config);
