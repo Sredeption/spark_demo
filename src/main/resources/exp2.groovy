@@ -1,4 +1,14 @@
-greet 'hello';
-println row['left.p1'];
-println row['left.p3'];
-println row['left.p1'] + row['left.p3'];
+let 'v1' be { left['p1'] + right['p2'] }
+
+let 'b' be row.getLeftColumns['d1']
+let 'c' be row.getRightColumns['c1']
+
+from ds1 where "$c==c1"
+
+suppose {
+
+} then {
+
+} otherwise {
+
+}

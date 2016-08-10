@@ -1,7 +1,8 @@
 package com.sea.spark
 
 import com.sea.dsl.Explainer
-import org.apache.spark.sql.SQLContext
+import org.apache.log4j.{Level, Logger}
+import org.apache.spark.sql.{Row, SQLContext}
 import org.apache.spark.{SparkConf, SparkContext}
 
 /**
@@ -10,7 +11,7 @@ import org.apache.spark.{SparkConf, SparkContext}
   */
 
 object SparkDemo extends App {
-
+  Logger.getLogger("org").setLevel(Level.OFF)
   val conf = new SparkConf().setAppName("Spark Demo").setMaster("local[4]")
   val sc = new SparkContext(conf)
   val sqlContext = new SQLContext(sc)
@@ -21,11 +22,8 @@ object SparkDemo extends App {
   val t = job.matches()
   t.show()
   val d = job.diff()
+  val x:Iterable[Row]=null
 
-  d.schema.fields
-  def explainer = new Explainer(getClass.getClassLoader.getResourceAsStream("exp2.groovy"))
 
-  d.show()
-  d.collect().foreach(explainer.explain)
 }
 

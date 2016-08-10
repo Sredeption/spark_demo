@@ -1,6 +1,5 @@
 package com.sea.dsl;
 
-import com.sea.dsl.explain.Tuple;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
@@ -31,7 +30,7 @@ public class Explainer implements Serializable {
     }
 
     public void explain(Row row) {
-        script.get("script").getBinding().setVariable("row", new Tuple(row));
+//        script.get("script").getBinding().setVariable("row", new Tuple(row));
         script.get("script").run();
     }
 }
