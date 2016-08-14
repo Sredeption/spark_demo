@@ -5,10 +5,10 @@ let 'c' be row.getRightColumns['c1']
 
 from ds1 where "$c==c1"
 
-suppose {
+when {
 
 } then {
 
-} otherwise {
+} other {
 
 }

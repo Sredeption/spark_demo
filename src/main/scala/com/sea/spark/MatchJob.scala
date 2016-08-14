@@ -38,34 +38,15 @@ class MatchJob(sqlContext: SQLContext, left: DataFrame, right: DataFrame, joinRu
   d.map(r => r._2).collect().foreach(println)
 
   def matches(): DataFrame = {
-    val res = table.flatMap(m => {
-      val leftRows = m._2._1.groupBy(r => validateRules.getLeftKey(r))
-      val rightRows = m._2._2.groupBy(r => validateRules.getRightKey(r))
-      leftRows.flatMap(k => k._2.flatMap(lr => rightRows.getOrElse(k._1, new ArrayBuffer()).map(rr => lr.toSeq ++ rr.toSeq)))
-    }).map[Row](s => Row.fromSeq(s))
-    val fields = left.schema.map(s => s.copy(name = "left." + s.name)) ++ right.schema.map(s => s.copy(name = "right." + s.name))
+    val fields = left.schema.map(s => s.copy(name = "leftTable_" + s.name)) ++ right.schema.map(s => s.copy(name = "rightTable_" + s.name))
     val structType = StructType(fields)
-    sqlContext.createDataFrame(res, structType)
+    sqlContext.createDataFrame(m.map(r => Row.fromSeq(r._2._1.toSeq ++ r._2._2.toSeq)), structType)
   }
 
   def diff(): DataFrame = {
-    val res = table.flatMap(m => {
-      val leftRows = m._2._1.groupBy(r => validateRules.getLeftKey(r))
-      val rightRows = m._2._2.groupBy(r => validateRules.getRightKey(r))
-      val leftUnMatch = (leftRows.keySet -- rightRows.keySet).toList
-      val rightUnMatch = (rightRows.keySet -- leftRows.keySet).toList
-      val leftRemain = (leftRows.keySet -- leftUnMatch).toList
-      val lm = leftUnMatch.flatMap(k => leftRows.get(k).get.flatMap(lr => {
-        rightRows.values.reduce((a, b) => a ++ b).map(rr => lr.toSeq ++ rr.toSeq)
-      }))
-      val rm = rightUnMatch.flatMap(k => rightRows.get(k).get.flatMap(rr => {
-        leftRemain.map(k => leftRows.get(k).get).reduce((a, b) => a ++ b).map(lr => lr.toSeq ++ rr.toSeq)
-      }))
-      lm ++ rm
-    }).map[Row](s => Row.fromSeq(s))
-    val fields = left.schema.map(s => s.copy(name = "left." + s.name)) ++ right.schema.map(s => s.copy(name = "right." + s.name))
+    val fields = left.schema.map(s => s.copy(name = "leftTable_" + s.name)) ++ right.schema.map(s => s.copy(name = "rightTable_" + s.name))
     val structType = StructType(fields)
-    sqlContext.createDataFrame(res, structType)
+    sqlContext.createDataFrame(d.map(r => Row.fromSeq(r._2._1.toSeq ++ r._2._2.toSeq)), structType)
   }
 
   def filterDuplicate(rdd: RDD[Row], rules: JoinRules): RDD[(String, (Row, Int))] =

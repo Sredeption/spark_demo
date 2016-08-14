@@ -1,24 +1,37 @@
 package com.sea.dsl.explain;
 
 public class DramaObject {
-    private String obj;
+    private int index;
+    private Context context;
 
-    public DramaObject(String obj) {
-        this.obj = obj;
+    public DramaObject(Context context) {
+        this.context = context;
     }
 
-    public DramaObject plus(DramaObject dramaObject) {
-        System.out.printf("DramaObject::plus(%s ,%s)%n", obj, dramaObject.obj);
-        return this;
+    public Context getContext() {
+        return context;
     }
 
-    public DramaObject plus(Variable dramaObject) {
-        System.out.println("DramaObject::plus");
-        return this;
+    public void setIndex(int index) {
+        this.index = index;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof DramaObject && this.index == ((DramaObject) obj).index;
+    }
+
+    @Override
+    public int hashCode() {
+        return index;
     }
 
     @Override
     public String toString() {
-        return obj;
+        return String.format("%s[%d]", this.getClass().getName(), index);
     }
 }

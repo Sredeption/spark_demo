@@ -1,8 +1,8 @@
 package com.sea.spark
 
-import com.sea.dsl.Explainer
+import com.sea.dsl.explain.Handler
 import org.apache.log4j.{Level, Logger}
-import org.apache.spark.sql.{Row, SQLContext}
+import org.apache.spark.sql.SQLContext
 import org.apache.spark.{SparkConf, SparkContext}
 
 /**
@@ -22,8 +22,8 @@ object SparkDemo extends App {
   val t = job.matches()
   t.show()
   val d = job.diff()
-  val x:Iterable[Row]=null
-
-
+  d.show()
+  val handler=new Handler
+  handler.handle(d)
 }
 
