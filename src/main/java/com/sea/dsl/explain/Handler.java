@@ -2,7 +2,7 @@ package com.sea.dsl.explain;
 
 import org.apache.spark.sql.DataFrame;
 
-import java.io.InputStream;
+import java.io.*;
 import java.util.Scanner;
 
 public class Handler {
@@ -13,7 +13,7 @@ public class Handler {
         Scanner scanner = new Scanner(inputStream);
         source = "";
         while (scanner.hasNext()) {
-            source += scanner.nextLine();
+            source += scanner.nextLine() + "\n";
         }
     }
 

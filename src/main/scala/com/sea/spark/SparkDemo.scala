@@ -22,7 +22,6 @@ object SparkDemo extends App {
   val t = job.matches()
   t.show()
   val d = job.diff()
-  d.show()
   val handler=new Handler
   handler.handle(d)
 }

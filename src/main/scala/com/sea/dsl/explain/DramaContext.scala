@@ -1,11 +1,9 @@
 package com.sea.dsl.explain
 
-import java.util
-
-import org.apache.log4j.{Level, Logger}
+import org.apache.log4j.Logger
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.types.DataTypes
 import org.apache.spark.sql.{DataFrame, Row}
+import org.apache.spark.sql.functions.udf
 
 class DramaContext(source: String, dataFrame: DataFrame) extends Context(source) {
   val logger = Logger.getLogger(getClass)
@@ -13,19 +11,31 @@ class DramaContext(source: String, dataFrame: DataFrame) extends Context(source)
   protected var rdd: RDD[Row] = null
   this.fields = dataFrame.schema.fieldNames
   this.rdd = dataFrame.rdd
+  val EXPLAIN = "__explain"
+  val sqlContext = dataFrame.sqlContext
 
-  dataFrame.schema.foreach(structField => {
-    if (structField.dataType == DataTypes.IntegerType)
-      let(structField.name, newInt)
-    else if (structField.dataType == DataTypes.LongType)
-      let(structField.name, newLong)
-    else if (structField.dataType == DataTypes.DoubleType)
-      let(structField.name, newDouble)
-    else if (structField.dataType == DataTypes.StringType)
-      let(structField.name, newString)
-    else if (structField.dataType == DataTypes.BooleanType)
-      let(structField.name, newBoolean)
+  val columns = dataFrame.columns
+  val mapEmpty: Any => Map[Seq[String], Seq[(String, String)]] = r => Map.empty
+  val toExp = udf(mapEmpty)
+  val temp = dataFrame.withColumn(EXPLAIN, toExp(dataFrame(columns.head)))
+  val context = sqlContext.createDataFrame(temp.map(r => {
+    val m = r.getAs[Map[Seq[String], Seq[(String, String)]]]("__explain")
+    val s = r.toSeq.toArray
+    s(r.fieldIndex("__explain")) = m + (Seq("leftTable_p2", "rightTable_p5") -> Array.empty)
+    Row.fromSeq(s.toSeq)
+  }), temp.schema)
+  context.printSchema()
+  context.show()
+  columns.foreach(c => {
+    let(c, DramaObject(context(c)))
   })
+
+  binding.setProperty("context", context)
+
+  override def run(): Unit = {
+    super.run()
+    binding.getProperty("context").asInstanceOf[DataFrame].select("__explain").foreach(println)
+  }
 
   override def stepRow(f: Row => Row): Unit = {
     rdd = rdd.map(f).cache()
@@ -37,17 +47,4 @@ class DramaContext(source: String, dataFrame: DataFrame) extends Context(source)
 
   override protected def getFields: Array[String] = fields
 
-  override def leaveScope(): util.List[DramaObject] = {
-    stepRow(r => Row.fromSeq(Range(0, fp).map(i => r.get(i))))
-    super.leaveScope
-  }
-
-  override def explain(dramaBoolean: DramaBoolean, content: String): Unit = {
-    val idx = dramaBoolean.getIndex
-    rdd.foreach(r => {
-      if (r.getBoolean(idx))
-        println(s"$r:$content")
-      r
-    })
-  }
 }
